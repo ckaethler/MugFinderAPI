@@ -4,14 +4,17 @@ const bcrypt = require('bcrypt-nodejs');
 const cors = require('cors');
 const port = 3001;
 
+// Tells express to use CORS and convert to JSON
 app.use(express.json());
 app.use(cors());
 
+// Example Database
 const database = {
     users: [
         {
             id: '123',
-            name: "john",
+            firstName: "John",
+            lastName: "Smith",
             email: "john@gmail.com",
             password: "password",
             entries: 0,
@@ -19,7 +22,8 @@ const database = {
         },
         {
             id: '124',
-            name: "sally",
+            firstName: "Cat",
+            lastName: "Kaethler",
             email: "ckaethler@gmail.com",
             password: "password",
             entries: 3,
@@ -35,10 +39,12 @@ const database = {
     ]
 }
 
+// Retrieves all database information
 app.get('/', (req, res) => {
     res.send(database.users);
 })
 
+// Retrieves specific person based on their ID
 app.get('/profile/:id', (req, res) => {
     const { id } = req.params;
     let found = false;
@@ -53,6 +59,7 @@ app.get('/profile/:id', (req, res) => {
     }
 });
 
+// Authenticates sign in request
 app.post('/signin', (req, res) => {
     // bcrypt.compare("bacon", hash, (err, res) => {
     //     // res === true
@@ -70,22 +77,25 @@ app.post('/signin', (req, res) => {
         }
 })
 
+// Authenticates register request
 app.post('/register', (req, res) => {
-    const { email, name, password } = req.body;
+    const { email, firstName, lastName, password } = req.body;
     bcrypt.hash(password, null, null, function(err, hash) {
         console.log(hash);
     });
     database.users.push({
         id: '125',
-        name: name,
+        firstName: firstName,
+        lastName: lastName,
         email: email,
         password: password,
-        entries: 3,
+        entries: 0,
         joined: new Date(),
     });
     res.json(database.users[database.users.length - 1]);
 });
 
+// Handles when a user searches an image for a face
 app.post('/image', (req, res) => {
     const { id } = req.body;
     found = false;
@@ -101,10 +111,7 @@ app.post('/image', (req, res) => {
     }
 });
 
+// Creates API listener
 app.listen(port, () => {
     console.log('app is running on port ', port);
 });
-// sign in --> POST = success/fail
-// register --> POST = user
-// profile/:id --> GET = user
-// image --> PUT --> user
