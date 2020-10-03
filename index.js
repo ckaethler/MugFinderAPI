@@ -12,21 +12,12 @@ app.use(cors());
 const database = {
     users: [
         {
-            id: '123',
+            id: '1',
             firstName: "John",
             lastName: "Smith",
-            email: "john@gmail.com",
-            password: "password",
-            entries: 0,
-            joined: new Date(),
-        },
-        {
-            id: '124',
-            firstName: "Cat",
-            lastName: "Kaethler",
-            email: "ckaethler@gmail.com",
-            password: "password",
-            entries: 3,
+            email: "john@mail.com",
+            password: "1",
+            rank: 0,
             joined: new Date(),
         }
     ],
@@ -71,7 +62,7 @@ app.post('/signin', (req, res) => {
 
     if(req.body.email === database.users[0].email && 
         req.body.password === database.users[0].password) {
-            res.json('success');
+            res.json(database.users[0]);
         } else {
             res.status(400).json('error logging in');
         }
@@ -89,21 +80,21 @@ app.post('/register', (req, res) => {
         lastName: lastName,
         email: email,
         password: password,
-        entries: 0,
+        rank: 0,
         joined: new Date(),
     });
     res.json(database.users[database.users.length - 1]);
 });
 
 // Handles when a user searches an image for a face
-app.post('/image', (req, res) => {
+app.put('/image', (req, res) => {
     const { id } = req.body;
     found = false;
     database.users.forEach(user => {
         if(user.id === id) {
             found = true;
-            user.entries++;
-            return res.json(user.entries);
+            user.rank++;
+            return res.json({rank: user.rank});
         }
     });
     if (!found) {
