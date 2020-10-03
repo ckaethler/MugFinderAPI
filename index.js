@@ -54,16 +54,16 @@ app.get('/profile/:id', (req, res) => {
 });
 
 app.post('/signin', (req, res) => {
-    bcrypt.compare("bacon", hash, (err, res) => {
-        // res === true
-    });
+    // bcrypt.compare("bacon", hash, (err, res) => {
+    //     // res === true
+    // });
 
-    bcrypt.compare("veggies", hash, (err, res) => {
-        // res === false
-    })
+    // bcrypt.compare("veggies", hash, (err, res) => {
+    //     // res === false
+    // })
 
-    if(req.body.email === database.users[1].email && 
-        req.body.password === database.users[1].password) {
+    if(req.body.email === database.users[0].email && 
+        req.body.password === database.users[0].password) {
             res.json('success');
         } else {
             res.status(400).json('error logging in');
