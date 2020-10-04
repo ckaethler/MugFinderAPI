@@ -1,5 +1,8 @@
 const handleSignIn = (db, bcrypt) => (req, res) => {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json("Incorrect login credentials.");
+    }
     return db
         .select('email', 'password_hash')
         .from('login')
@@ -10,7 +13,7 @@ const handleSignIn = (db, bcrypt) => (req, res) => {
                 return db
                     .select('*')
                     .from('users')
-                    .where('email', '=', req.body.email)
+                    .where('email', '=', email)
                     .then(user => {
                         res.json(user[0])
                     })

@@ -1,5 +1,6 @@
 const handleGetProfile = (db) => (req, res) => {
     const { id } = req.params;
+    if (!id ) return res.status(400).json("ID required");
     return db
         .select('*')
         .from('users')

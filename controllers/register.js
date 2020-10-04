@@ -1,5 +1,8 @@
 const handleRegister = (db, bcrypt) => (req, res) => {
     const { email, firstName, lastName, password } = req.body;
+    if (!email || !password || !firstName || !lastName) {
+        return res.status(400).json("All fields required to register");
+    }
     const password_hash = bcrypt.hashSync(password);
     return db.transaction(trx => {
         trx.insert({
@@ -7,7 +10,7 @@ const handleRegister = (db, bcrypt) => (req, res) => {
             email: email})
         .into('login')
         .returning('email')
-        .then(loginEmail => {
+        .then(data => {
             return trx('users')
                 .returning('*')
                 .insert({
@@ -20,7 +23,7 @@ const handleRegister = (db, bcrypt) => (req, res) => {
                 .catch(err => res.status(400).json("unable to register"))})
         .then(trx.commit)
         .catch(trx.rollback);
-    });
+    }).catch(err => console.log(err));
 }
 
 module.exports = {
