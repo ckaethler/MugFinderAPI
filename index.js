@@ -3,32 +3,28 @@ const app = express();
 const bcrypt = require('bcrypt-nodejs');
 const cors = require('cors');
 const port = 3001;
+const knex = require('knex');
+
+const db = knex({
+    client: 'pg',
+    connection: {
+      host : '127.0.0.1',
+      user : 'postgres',
+      password : '',
+      database : 'mugfinder-db'
+    }
+});
+
+db.select('*').from('users').then(data => {
+    console.log(data);
+});
 
 // Tells express to use CORS and convert to JSON
 app.use(express.json());
 app.use(cors());
 
 // Example Database
-const database = {
-    users: [
-        {
-            id: '1',
-            firstName: "John",
-            lastName: "Smith",
-            email: "john@mail.com",
-            password: "1",
-            rank: 0,
-            joined: new Date(),
-        }
-    ],
-    login: [
-        {
-            id: '987',
-            hash: '',
-            email: 'ckaethler@gmail.com',
-        }
-    ]
-}
+
 
 // Retrieves all database information
 app.get('/', (req, res) => {
@@ -71,19 +67,12 @@ app.post('/signin', (req, res) => {
 // Authenticates register request
 app.post('/register', (req, res) => {
     const { email, firstName, lastName, password } = req.body;
-    bcrypt.hash(password, null, null, function(err, hash) {
-        console.log(hash);
-    });
-    database.users.push({
-        id: '125',
+    db('users').insert({
+        email: email,
         firstName: firstName,
         lastName: lastName,
-        email: email,
-        password: password,
-        rank: 0,
         joined: new Date(),
-    });
-    res.json(database.users[database.users.length - 1]);
+    }).then(data => console.log(data));
 });
 
 // Handles when a user searches an image for a face
