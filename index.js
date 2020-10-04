@@ -91,7 +91,9 @@ app.put('/image', (req, res) => {
         .where('id', '=', id)
         .increment('rank', 1)
         .returning('rank')
-        .then(rank => res.json("Rank updated to " + rank))
+        .then(rank => {
+            res.json({rank: rank[0]});
+        })
         .catch(err => res.status(400).json("Unable to update user rank"));
 });
 
