@@ -15,80 +15,84 @@ const db = knex({
     }
 });
 
-db.select('*').from('users').then(data => {
-    console.log(data);
-});
-
 // Tells express to use CORS and convert to JSON
 app.use(express.json());
 app.use(cors());
 
-// Example Database
-
-
-// Retrieves all database information
-app.get('/', (req, res) => {
-    res.send(database.users);
-})
-
 // Retrieves specific person based on their ID
 app.get('/profile/:id', (req, res) => {
     const { id } = req.params;
-    let found = false;
-    database.users.forEach(user => {
-        if(user.id === id) {
-            found = true;
-            return res.json(user);
-        } 
-    });
-    if (!found) {
-        res.status(400).json('not found');
-    }
+    return db
+        .select('*')
+        .from('users')
+        .where({id})
+        .then(user => {
+            if(user.length) res.json(user[0]);
+            else res.status(400).json('user not found');
+        })
+        .catch(err => res.status(400).json('Unable to get user information'));
 });
 
 // Authenticates sign in request
 app.post('/signin', (req, res) => {
-    // bcrypt.compare("bacon", hash, (err, res) => {
-    //     // res === true
-    // });
-
-    // bcrypt.compare("veggies", hash, (err, res) => {
-    //     // res === false
-    // })
-
-    if(req.body.email === database.users[0].email && 
-        req.body.password === database.users[0].password) {
-            res.json(database.users[0]);
-        } else {
-            res.status(400).json('error logging in');
-        }
+    const {email, password} = req.body;
+    return db
+        .select('email', 'password_hash')
+        .from('login')
+        .where('email', '=', email)
+        .then(data => {
+            const isValid = bcrypt.compareSync(password,data[0].password_hash);
+            if (isValid) {
+                return db
+                    .select('*')
+                    .from('users')
+                    .where('email', '=', req.body.email)
+                    .then(user => {
+                        res.json(user[0])
+                    })
+                    .catch(err => res.status(400).json('Unable to get user'))
+            } else return res.status(400).json("Credentials incorrect.");
+        }).catch(err => res.status(400).json("Credentials incorrect."))
 })
 
-// Authenticates register request
+// Authenticates & handles new user çregister request
 app.post('/register', (req, res) => {
     const { email, firstName, lastName, password } = req.body;
-    db('users').insert({
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
-        joined: new Date(),
-    }).then(data => console.log(data));
+    const password_hash = bcrypt.hashSync(password);
+    return db.transaction(trx => {
+        trx.insert({
+            password_hash: password_hash,
+            email: email
+        })
+        .into('login')
+        .returning('email')
+        .then(loginEmail => {
+            return trx('users')
+                .returning('*')
+                .insert({
+                    email: email,
+                    firstName: firstName,
+                    lastName: lastName,
+                    joined: new Date()
+                })
+                .then(user => res.json(user[0]))
+                .catch(err => res.status(400).json("unable to register"));
+        })
+    .then(trx.commit)
+    .catch(trx.rollback);
+    })
+    
 });
 
-// Handles when a user searches an image for a face
+// Handles when a user searches an image by updating user rank
 app.put('/image', (req, res) => {
     const { id } = req.body;
-    found = false;
-    database.users.forEach(user => {
-        if(user.id === id) {
-            found = true;
-            user.rank++;
-            return res.json({rank: user.rank});
-        }
-    });
-    if (!found) {
-        return res.status(400).json("error");
-    }
+    return db('users')
+        .where('id', '=', id)
+        .increment('rank', 1)
+        .returning('rank')
+        .then(rank => res.json("Rank updated to " + rank))
+        .catch(err => res.status(400).json("Unable to update user rank"));
 });
 
 // Creates API listener
