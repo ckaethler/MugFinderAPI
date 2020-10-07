@@ -23,6 +23,7 @@ const db = knex({
     }
 });
 
+app.get('/', (req, res) => res.send("MugFinderAPI up and running"));
 app.get('/profile/:id', handleGetProfile(db));
 app.post('/signin', handleSignIn(db, bcrypt));
 app.post('/register', handleRegister(db, bcrypt));
