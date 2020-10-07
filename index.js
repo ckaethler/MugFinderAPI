@@ -11,7 +11,7 @@ app.use(cors());
 const { handleRegister } = require('./controllers/register');
 const { handleSignIn } = require('./controllers/signin');
 const { handleGetProfile } = require('./controllers/profile');
-const { handleImage } = require('./controllers/image');
+const { handleImage, handleAPICall } = require('./controllers/image');
 
 const db = knex({
     client: 'pg',
@@ -27,6 +27,7 @@ app.get('/profile/:id', handleGetProfile(db));
 app.post('/signin', handleSignIn(db, bcrypt));
 app.post('/register', handleRegister(db, bcrypt));
 app.put('/image', handleImage(db));
+app.post('/imageurl', handleAPICall());
 
 app.listen(port, () => {
     console.log('app is running on port ', port);

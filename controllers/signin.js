@@ -18,8 +18,8 @@ const handleSignIn = (db, bcrypt) => (req, res) => {
                         res.json(user[0])
                     })
                     .catch(err => res.status(400).json('Unable to get user'))
-            } else return res.status(400).json("Credentials incorrect.");
-        }).catch(err => res.status(400).json("Credentials incorrect."))
+            } else return res.status(400).json("Credentials incorrect.")})
+        .catch(err => res.status(400).json("Credentials incorrect."))
 }
 
 module.exports = {
