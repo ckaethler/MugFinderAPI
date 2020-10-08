@@ -15,8 +15,9 @@ const handleRegister = (db, bcrypt) => (req, res) => {
                 .returning('*')
                 .insert({
                     email: email,
-                    firstName: firstName,
-                    lastName: lastName,
+                    firstname: firstName,
+                    lastname: lastName,
+                    rank: 0,
                     joined: new Date()})
                 .then(user => res.json(user[0]))
                 .catch(err => res.status(400).json(err))})
