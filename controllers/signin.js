@@ -4,11 +4,11 @@ const handleSignIn = (db, bcrypt) => (req, res) => {
         return res.status(400).json("Incorrect login credentials.");
     }
     return db
-        .select('email', 'password_hash')
+        .select('email', 'password')
         .from('login')
         .where('email', '=', email)
         .then(data => {
-            const isValid = bcrypt.compareSync(password,data[0].password_hash);
+            const isValid = bcrypt.compareSync(password,data[0].password);
             if (isValid) {
                 return db
                     .select('*')
